@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Projekte – PalMed Deutschland</title>
-<meta name="description" content="Die laufenden und abgeschlossenen Projekte von PalMed Deutschland – vom Wiederaufbau der Dialyse-Einheit in Gaza bis zum Stipendienprogramm.">
+<meta name="robots" content="noindex">
+<meta name="description" content="Die Projektübersicht von PalMed Deutschland – exklusiv für Mitglieder.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -65,11 +66,25 @@
 
 <section class="page-hero">
   <div class="wrap">
-    <span class="kicker">Unsere Projekte</span>
+    <span class="kicker">Unsere Projekte · Mitgliederbereich</span>
     <h1>Hilfe, die ankommt</h1>
-    <p>Vom Wiederaufbau zerstörter Kliniken über medizinische Delegationen bis zur Förderung des Nachwuchses – hier sehen Sie, woran PalMed Deutschland gerade arbeitet und was wir bereits erreicht haben.</p>
+    <p>Vom Wiederaufbau zerstörter Kliniken über medizinische Delegationen bis zur Förderung des Nachwuchses – die Projektübersicht ist Mitgliedern von PalMed Deutschland vorbehalten.</p>
   </div>
 </section>
+
+<section class="section" id="sperre">
+  <div class="wrap">
+    <div class="card" style="max-width:560px;padding:2.2rem 2rem">
+      <h3>Nur für Mitglieder</h3>
+      <p style="color:var(--ink-soft);margin:0.6rem 0 1.2rem">Bitte melden Sie sich im Mitgliederbereich an – danach erscheint diese Seite automatisch. Als Mitglied können Sie sich dort auch direkt an Projekten beteiligen.</p>
+      <a href="mitglieder.html" class="btn btn-primary">Zum Mitglieder-Login</a>
+      <a href="mitglied-werden.html" class="btn btn-outline" style="margin-left:0.6rem">Mitglied werden</a>
+      <p id="sperre-hinweis" class="form-hint" style="display:none;margin-top:1.2rem">Der Mitgliederbereich wird gerade eingerichtet und ist in Kürze verfügbar.</p>
+    </div>
+  </div>
+</section>
+
+<div id="nur-mitglieder" style="display:none">
 
 <section class="section">
   <div class="wrap">
@@ -180,6 +195,8 @@
   </div>
 </section>
 
+</div>
+
 </main>
 
 <footer class="site-footer">
@@ -230,5 +247,24 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="portal-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  var sperre = document.getElementById("sperre");
+  var inhalt = document.getElementById("nur-mitglieder");
+  if (!window.PORTAL || !window.PORTAL.url || !window.PORTAL.anonKey) {
+    document.getElementById("sperre-hinweis").style.display = "";
+    return;
+  }
+  var sb = window.supabase.createClient(window.PORTAL.url, window.PORTAL.anonKey);
+  sb.auth.getSession().then(function (r) {
+    if (r.data && r.data.session) {
+      sperre.style.display = "none";
+      inhalt.style.display = "";
+    }
+  });
+})();
+</script>
 </body>
 </html>
