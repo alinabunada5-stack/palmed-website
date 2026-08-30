@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verwaltung – PalMed Deutschland</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png?v=3">
+<meta name="theme-color" content="#008233">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .status-zeile { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 0.25rem 0.7rem; border-radius: 999px; }
+  .st-offen { background: #f7f0df; color: #7a5410; }
+  .st-genehmigt { background: var(--green-pale); color: var(--green-dark); }
+  .st-abgelehnt { background: #fbeae8; color: var(--red); }
+  .antrag-karte { margin-bottom: 1.2rem; }
+  .antrag-karte .kopf { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
+  .antrag-karte .daten { font-size: 0.93rem; color: var(--ink-soft); margin: 0.5rem 0;
+    display: grid; grid-template-columns: 110px 1fr; gap: 0.15rem 1rem; }
+  .antrag-karte .daten b { color: var(--ink); font-weight: 600; }
+  .antrag-karte textarea { margin-top: 0.5rem; }
+  .aktionen { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.8rem; }
+  .btn-klein { padding: 0.5rem 1.2rem; font-size: 0.88rem; }
+  .filter { display: flex; gap: 0.5rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+  .filter button { border: 2px solid var(--line); background: var(--white); border-radius: 999px;
+    padding: 0.45rem 1.1rem; font: 600 0.88rem var(--font-body); cursor: pointer; }
+  .filter button.an { border-color: var(--green-dark); background: var(--green-dark); color: #fff; }
+  .laden { color: var(--ink-soft); font-size: 0.95rem; }
+  .sperre { background: #fbeae8; border: 1px solid rgba(207,30,18,.3); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div><span>PalMed Deutschland · Verwaltung</span></div>
+    <div><a href="mitglieder.html">Zum Mitgliederbereich</a></div>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="logo-text.png?v=3" alt="PalMed Deutschland" class="brand-logo" width="1072" height="370">
+      <span><span class="brand-sub">Verwaltung ·<br>nur für den Vorstand</span></span>
+    </a>
+  </div>
+</header>
+
+<main id="inhalt">
+<section class="section">
+  <div class="wrap">
+
+    <div id="v-laden" class="laden">Anmeldung wird geprüft …</div>
+
+    <div id="v-sperre" class="sperre" style="display:none">
+      <strong>Kein Zugriff.</strong> Diese Seite ist dem Vorstand vorbehalten.
+      Bitte melden Sie sich zunächst im <a href="mitglieder.html">Mitgliederbereich</a> an.
+      Wenn Sie Vorstandsmitglied sind und keinen Zugriff haben, wenden Sie sich an die Portal-Verwaltung.
+    </div>
+
+    <div id="v-inhalt" style="display:none">
+      <div class="section-head" style="margin-bottom:1.6rem">
+        <span class="kicker">Verwaltung</span>
+        <h2>Bescheinigungs-Anträge</h2>
+        <p>Prüfen, entscheiden, Kommentar hinterlassen – das Mitglied sieht die Entscheidung sofort in seinem Portal.</p>
+      </div>
+
+      <div class="filter" id="filter">
+        <button class="an" data-f="offen">Offen</button>
+        <button data-f="genehmigt">Genehmigt</button>
+        <button data-f="abgelehnt">Abgelehnt</button>
+        <button data-f="alle">Alle</button>
+      </div>
+
+      <div id="antraege" class="laden">Wird geladen …</div>
+
+      <div class="section-head" style="margin:3rem 0 1.2rem">
+        <h2>Projekt-Interessen</h2>
+        <p>Mitglieder, die sich an Projekten beteiligen möchten.</p>
+      </div>
+      <div class="card" style="padding:0.6rem 1.5rem">
+        <div id="beteiligungen" class="laden">Wird geladen …</div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script src="portal-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(t) {
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  if (!window.PORTAL || !window.PORTAL.url) {
+    $("v-laden").textContent = "Das Portal ist noch nicht eingerichtet.";
+    return;
+  }
+  var sb = window.supabase.createClient(window.PORTAL.url, window.PORTAL.anonKey);
+  var filter = "offen";
+  var gestartet = false;
+
+  sb.auth.onAuthStateChange(async function (_e, sitzung) {
+    if (gestartet) return;
+    if (!sitzung || !sitzung.user) {
+      $("v-laden").style.display = "none";
+      $("v-sperre").style.display = "";
+      return;
+    }
+    var a = await sb.from("admins").select("id").eq("id", sitzung.user.id).maybeSingle();
+    if (!a.data) {
+      $("v-laden").style.display = "none";
+      $("v-sperre").style.display = "";
+      return;
+    }
+    gestartet = true;
+    $("v-laden").style.display = "none";
+    $("v-inhalt").style.display = "";
+    antraegeLaden();
+    beteiligungenLaden();
+  });
+
+  $("filter").addEventListener("click", function (e) {
+    if (!e.target.dataset.f) return;
+    filter = e.target.dataset.f;
+    document.querySelectorAll("#filter button").forEach(function (b) { b.classList.remove("an"); });
+    e.target.classList.add("an");
+    antraegeLaden();
+  });
+
+  async function antraegeLaden() {
+    var abfrage = sb.from("antraege")
+      .select("*, profile:mitglied (vorname, nachname, email, ort)")
+      .order("erstellt", { ascending: false });
+    if (filter !== "alle") abfrage = abfrage.eq("status", filter);
+    var r = await abfrage;
+    var ziel = $("antraege");
+    if (r.error) { ziel.textContent = "Fehler: " + r.error.message; return; }
+    ziel.classList.remove("laden");
+    if (!r.data.length) { ziel.innerHTML = '<p class="laden">Keine Anträge in dieser Ansicht.</p>'; return; }
+
+    ziel.innerHTML = r.data.map(function (a) {
+      var p = a.profile || {};
+      var name = ((p.vorname || "") + " " + (p.nachname || "")).trim() || p.email || "Unbekannt";
+      var mailBetreff = encodeURIComponent(a.art + " " + a.jahr + " – PalMed Deutschland");
+      var mailText = encodeURIComponent(
+        "Sehr geehrte/r " + name + ",\n\nanbei erhalten Sie Ihre " + a.art + " für das Jahr " + a.jahr +
+        (a.betrag ? " über " + a.betrag : "") + ".\n\nMit freundlichen Grüßen\nDeutsch-Palästinensisches Ärzteforum e.V.");
+      return '<div class="card antrag-karte" data-id="' + a.id + '">' +
+        '<div class="kopf"><h3 style="margin:0">' + esc(a.art) + " " + a.jahr + "</h3>" +
+        '<span class="status-zeile st-' + a.status + '">' + a.status + "</span></div>" +
+        '<div class="daten">' +
+        "<span>Mitglied</span><b>" + esc(name) + (p.email ? " · " + esc(p.email) : "") + "</b>" +
+        "<span>Betrag</span><b>" + esc(a.betrag || "–") + "</b>" +
+        "<span>Anschrift</span><b>" + esc(a.anschrift).replace(/\n/g, "<br>") + "</b>" +
+        (a.anmerkung ? "<span>Anmerkung</span><b>" + esc(a.anmerkung) + "</b>" : "") +
+        "<span>Eingereicht</span><b>" + new Date(a.erstellt).toLocaleDateString("de-DE") + "</b>" +
+        "</div>" +
+        '<label for="km-' + a.id + '" style="font-size:0.85rem;font-weight:600">Kommentar an das Mitglied</label>' +
+        '<textarea id="km-' + a.id + '" rows="2">' + esc(a.kommentar || "") + "</textarea>" +
+        '<div class="aktionen">' +
+        '<button class="btn btn-primary btn-klein" data-tu="genehmigt">✓ Genehmigen</button>' +
+        '<button class="btn btn-donate btn-klein" data-tu="abgelehnt">✕ Ablehnen</button>' +
+        '<button class="btn btn-outline btn-klein" data-tu="kommentar">Nur Kommentar speichern</button>' +
+        (a.status === "genehmigt" && p.email
+          ? '<a class="btn btn-outline btn-klein" href="mailto:' + esc(p.email) + "?subject=" + mailBetreff + "&body=" + mailText + '">✉ Bescheinigung senden</a>'
+          : "") +
+        "</div></div>";
+    }).join("");
+
+    ziel.querySelectorAll("button[data-tu]").forEach(function (b) {
+      b.addEventListener("click", async function () {
+        var karte = b.closest(".antrag-karte");
+        var id = karte.dataset.id;
+        var kommentar = karte.querySelector("textarea").value.trim();
+        var neu = { kommentar: kommentar };
+        if (b.dataset.tu !== "kommentar") {
+          neu.status = b.dataset.tu;
+          neu.entschieden = new Date().toISOString();
+        }
+        b.textContent = "Speichert …";
+        var r = await sb.from("antraege").update(neu).eq("id", id);
+        if (r.error) { alert("Fehler: " + r.error.message); }
+        antraegeLaden();
+      });
+    });
+  }
+
+  async function beteiligungenLaden() {
+    var r = await sb.from("beteiligungen")
+      .select("*, profile:mitglied (vorname, nachname, email)")
+      .order("erstellt", { ascending: false }).limit(50);
+    var ziel = $("beteiligungen");
+    if (r.error) { ziel.textContent = "Fehler: " + r.error.message; return; }
+    if (!r.data.length) { ziel.textContent = "Noch keine Meldungen."; return; }
+    ziel.classList.remove("laden");
+    ziel.innerHTML = r.data.map(function (b) {
+      var p = b.profile || {};
+      var name = ((p.vorname || "") + " " + (p.nachname || "")).trim() || p.email || "Unbekannt";
+      return '<div style="border-bottom:1px solid var(--line);padding:0.9rem 0">' +
+        "<strong>" + esc(b.projekt) + "</strong> – " + esc(name) +
+        (p.email ? ' (<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + "</a>)" : "") +
+        (b.nachricht ? '<p style="font-size:0.92rem;color:var(--ink-soft);margin-top:0.3rem">' + esc(b.nachricht) + "</p>" : "") +
+        '<div style="font-size:0.82rem;color:var(--ink-soft);margin-top:0.2rem">' + new Date(b.erstellt).toLocaleDateString("de-DE") + "</div></div>";
+    }).join("");
+  }
+})();
+</script>
+</body>
+</html>

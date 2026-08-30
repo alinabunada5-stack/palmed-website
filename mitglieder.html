@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mitgliederbereich – PalMed Deutschland</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png?v=3">
+<link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192.png?v=3">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=3">
+<meta name="theme-color" content="#008233">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .portal-tabs { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .portal-tabs button {
+    border: 2px solid var(--line); background: var(--white); border-radius: 999px;
+    padding: 0.6rem 1.3rem; font: 600 0.93rem var(--font-body); color: var(--ink); cursor: pointer;
+  }
+  .portal-tabs button.an { border-color: var(--green-dark); background: var(--green-dark); color: #fff; }
+  .portal-bereich { display: none; }
+  .portal-bereich.an { display: block; }
+  .status-zeile { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 0.25rem 0.7rem; border-radius: 999px; }
+  .st-offen { background: #f7f0df; color: #7a5410; }
+  .st-genehmigt { background: var(--green-pale); color: var(--green-dark); }
+  .st-abgelehnt { background: #fbeae8; color: var(--red); }
+  .eintrag { border-bottom: 1px solid var(--line); padding: 1.1rem 0; }
+  .eintrag:last-child { border-bottom: none; }
+  .eintrag .kopf { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
+  .eintrag .kommentar { background: var(--bg-alt); border-radius: var(--radius); padding: 0.7rem 1rem;
+    font-size: 0.92rem; margin-top: 0.6rem; }
+  .hinweis-box { background: var(--green-pale); border: 1px solid rgba(0,130,51,.3); border-radius: var(--radius);
+    padding: 1rem 1.3rem; font-size: var(--text-sm); margin-bottom: 1.5rem; }
+  .fehler-box { background: #fbeae8; border: 1px solid rgba(207,30,18,.3); border-radius: var(--radius);
+    padding: 1rem 1.3rem; font-size: var(--text-sm); }
+  .laden { color: var(--ink-soft); font-size: 0.95rem; }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<div class="topbar">
+  <div class="wrap">
+    <div><span>Deutsch-Palästinensisches Ärzteforum e.V.</span></div>
+    <div class="contact-extra">
+      <span><a href="tel:+4917672755387">+49 176 72755387</a></span>
+      <span><a href="mailto:info@palmeddeutschland.de">info@palmeddeutschland.de</a></span>
+    </div>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="logo-text.png?v=3" alt="PalMed Deutschland" class="brand-logo" width="1072" height="370">
+      <span><span class="brand-sub">Deutsch-Palästinensisches<br>Ärzteforum e.V.</span></span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="hauptnav" aria-label="Menü öffnen"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="main-nav" id="hauptnav" aria-label="Hauptnavigation">
+      <a href="index.html">Startseite</a>
+      <a href="ueber-uns.html">Über uns</a>
+      <a href="vorstand.html">Vorstand</a>
+      <a href="projekte.html">Projekte</a>
+      <a href="aktuelles.html">Aktuelles</a>
+      <a href="mitglied-werden.html">Mitglied werden</a>
+      <a href="kontakt.html">Kontakt</a>
+      <a href="spenden.html" class="btn btn-donate">Spenden</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inhalt">
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="kicker">Mitgliederbereich</span>
+    <h1>Willkommen im Portal</h1>
+    <p>Persönliche Daten pflegen, Bescheinigungen beantragen, Projekte unterstützen und die interne Stellenbörse nutzen – exklusiv für Mitglieder von PalMed Deutschland.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+
+    <!-- Noch nicht eingerichtet -->
+    <div id="p-setup" style="display:none" class="card" >
+      <h3>Das Portal ist noch nicht freigeschaltet</h3>
+      <p>Der Mitgliederbereich wird gerade eingerichtet. Bis dahin erreichen Sie uns wie gewohnt unter <a href="mailto:info@palmeddeutschland.de">info@palmeddeutschland.de</a>.</p>
+    </div>
+
+    <!-- Anmeldung -->
+    <div id="p-login" style="display:none">
+      <div class="card" style="max-width:480px;padding:2.2rem 2rem">
+        <h3>Anmelden</h3>
+        <p style="color:var(--ink-soft);font-size:0.95rem;margin:0.5rem 0 1.2rem">Ganz ohne Passwort: Sie erhalten einen Anmelde-Link per E-Mail. Bitte die E-Mail-Adresse verwenden, die dem Verein bekannt ist.</p>
+        <form id="login-form">
+          <label for="login-email">E-Mail-Adresse</label>
+          <input id="login-email" type="email" autocomplete="email" required placeholder="ihre@email.de">
+          <button type="submit" class="btn btn-primary" style="margin-top:1rem">Anmelde-Link senden</button>
+        </form>
+        <p id="login-status" class="laden" style="margin-top:1rem"></p>
+      </div>
+    </div>
+
+    <!-- Portal -->
+    <div id="p-portal" style="display:none">
+      <div class="hinweis-box">Angemeldet als <strong id="wer"></strong> · <a href="#" id="abmelden">Abmelden</a><span id="admin-link" style="display:none"> · <a href="verwaltung.html"><strong>Zur Verwaltung</strong></a></span></div>
+
+      <div class="portal-tabs" role="tablist">
+        <button class="an" data-b="profil">Mein Profil</button>
+        <button data-b="antrag">Bescheinigungen</button>
+        <button data-b="projekte">Projekte</button>
+        <button data-b="stellen">Stellenbörse</button>
+      </div>
+
+      <!-- Profil -->
+      <div class="portal-bereich an" id="b-profil">
+        <div class="card" style="max-width:720px;padding:2rem">
+          <h3>Meine Daten</h3>
+          <form class="form-grid" id="profil-form" style="margin-top:1.2rem">
+            <div><label for="pf-vorname">Vorname</label><input id="pf-vorname" autocomplete="given-name"></div>
+            <div><label for="pf-nachname">Nachname</label><input id="pf-nachname" autocomplete="family-name"></div>
+            <div><label for="pf-ort">Wohnort</label><input id="pf-ort" autocomplete="address-level2"></div>
+            <div><label for="pf-telefon">Telefon</label><input id="pf-telefon" type="tel" autocomplete="tel"></div>
+            <div><label for="pf-beruf">Berufsgruppe</label>
+              <select id="pf-beruf"><option value=""></option><option>Ärztin / Arzt</option><option>Apothekerin / Apotheker</option><option>Studierende/r Medizin</option><option>Studierende/r Pharmazie</option></select>
+            </div>
+            <div><label for="pf-fach">Fachrichtung</label><input id="pf-fach"></div>
+            <div class="full checkline">
+              <input type="checkbox" id="pf-mail">
+              <label for="pf-mail">E-Mail-Benachrichtigungen erhalten (z. B. wenn über meinen Antrag entschieden wurde oder neue Projekte starten)</label>
+            </div>
+            <div class="full"><button type="submit" class="btn btn-primary">Änderungen speichern</button> <span id="profil-status" class="laden"></span></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Bescheinigungen -->
+      <div class="portal-bereich" id="b-antrag">
+        <div class="split" style="gap:2rem">
+          <div class="card" style="padding:2rem">
+            <h3>Bescheinigung beantragen</h3>
+            <form id="antrag-form" style="margin-top:1.2rem">
+              <label for="an-art">Art</label>
+              <select id="an-art"><option>Spendenbescheinigung</option><option>Beitragsbescheinigung</option></select>
+              <label for="an-jahr">Jahr</label>
+              <input id="an-jahr" type="number" min="2007" max="2100" required>
+              <label for="an-betrag">Betrag (falls bekannt)</label>
+              <input id="an-betrag" placeholder="z. B. 180 €">
+              <label for="an-anschrift">Anschrift für die Bescheinigung *</label>
+              <textarea id="an-anschrift" rows="3" required placeholder="Name&#10;Straße Hausnummer&#10;PLZ Ort"></textarea>
+              <label for="an-anmerkung">Anmerkung</label>
+              <textarea id="an-anmerkung" rows="2"></textarea>
+              <button type="submit" class="btn btn-primary" style="margin-top:1rem">Antrag absenden</button>
+              <span id="antrag-status" class="laden" style="display:block;margin-top:0.6rem"></span>
+            </form>
+          </div>
+          <div>
+            <h3 style="margin-bottom:0.8rem">Meine Anträge</h3>
+            <div class="card" style="padding:0.6rem 1.5rem">
+              <div id="antraege-liste" class="laden">Wird geladen …</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projekte -->
+      <div class="portal-bereich" id="b-projekte">
+        <div class="split" style="gap:2rem">
+          <div class="card" style="padding:2rem">
+            <h3>An einem Projekt mitwirken</h3>
+            <p style="color:var(--ink-soft);font-size:0.95rem;margin:0.5rem 0 1rem">Alle laufenden Projekte finden Sie auf der <a href="projekte.html" target="_blank">Projektseite</a>. Melden Sie hier Ihr Interesse – der Vorstand meldet sich mit den nächsten Schritten.</p>
+            <form id="beteiligung-form">
+              <label for="bt-projekt">Projekt</label>
+              <select id="bt-projekt">
+                <option>Wiederaufbau Dialyse-Einheit Al-Shifa</option>
+                <option>Medizinische Delegation</option>
+                <option>Trauma-Training für Kinder</option>
+                <option>PalMed-Stipendium (Mentoring)</option>
+                <option>Anderes / eigener Vorschlag</option>
+              </select>
+              <label for="bt-nachricht">Ihre Nachricht</label>
+              <textarea id="bt-nachricht" rows="3" placeholder="Fachrichtung, Verfügbarkeit, Fragen …"></textarea>
+              <button type="submit" class="btn btn-primary" style="margin-top:1rem">Interesse melden</button>
+              <span id="beteiligung-status" class="laden" style="display:block;margin-top:0.6rem"></span>
+            </form>
+          </div>
+          <div>
+            <h3 style="margin-bottom:0.8rem">Meine Meldungen</h3>
+            <div class="card" style="padding:0.6rem 1.5rem">
+              <div id="beteiligungen-liste" class="laden">Wird geladen …</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stellenbörse -->
+      <div class="portal-bereich" id="b-stellen">
+        <div class="split" style="gap:2rem">
+          <div class="card" style="padding:2rem">
+            <h3>Eintrag aufgeben</h3>
+            <form id="stellen-form" style="margin-top:1rem">
+              <label for="st-typ">Typ</label>
+              <select id="st-typ"><option>Stellenangebot</option><option>Stellengesuch</option></select>
+              <label for="st-titel">Titel *</label>
+              <input id="st-titel" required placeholder="z. B. Assistenzarzt (m/w/d) Innere Medizin">
+              <label for="st-ort">Ort</label>
+              <input id="st-ort">
+              <label for="st-text">Beschreibung *</label>
+              <textarea id="st-text" rows="3" required></textarea>
+              <label for="st-kontakt">Kontakt (E-Mail oder Telefon) *</label>
+              <input id="st-kontakt" required>
+              <button type="submit" class="btn btn-primary" style="margin-top:1rem">Veröffentlichen</button>
+              <span id="stellen-status" class="laden" style="display:block;margin-top:0.6rem"></span>
+            </form>
+          </div>
+          <div>
+            <h3 style="margin-bottom:0.8rem">Aktuelle Einträge</h3>
+            <div class="card" style="padding:0.6rem 1.5rem">
+              <div id="stellen-liste" class="laden">Wird geladen …</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p id="p-fehler" class="fehler-box" style="display:none"></p>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="bottom" style="border-top:none">
+      <span>© 2026 PalMed Deutschland · Deutsch-Palästinensisches Ärzteforum e.V.</span>
+      <span><a href="impressum.html">Impressum</a> <a href="datenschutz.html">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="portal-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function zeige(id) {
+    ["p-setup", "p-login", "p-portal"].forEach(function (p) { $(p).style.display = p === id ? "" : "none"; });
+  }
+  function fehler(text) {
+    var f = $("p-fehler");
+    f.textContent = text;
+    f.style.display = text ? "" : "none";
+  }
+  function esc(t) {
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  if (!window.PORTAL || !window.PORTAL.url || !window.PORTAL.anonKey) {
+    zeige("p-setup");
+    return;
+  }
+  var sb = window.supabase.createClient(window.PORTAL.url, window.PORTAL.anonKey);
+  var nutzer = null;
+
+  // ---------- Anmeldung ----------
+  $("login-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    $("login-status").textContent = "Link wird gesendet …";
+    var antwort = await sb.auth.signInWithOtp({
+      email: $("login-email").value.trim(),
+      options: { emailRedirectTo: location.href.split("#")[0] }
+    });
+    $("login-status").textContent = antwort.error
+      ? "Fehler: " + antwort.error.message
+      : "✓ Fertig! Bitte öffnen Sie den Link in der E-Mail, die wir Ihnen gerade geschickt haben.";
+  });
+
+  $("abmelden").addEventListener("click", async function (e) {
+    e.preventDefault();
+    await sb.auth.signOut();
+    location.reload();
+  });
+
+  // ---------- Tabs ----------
+  document.querySelectorAll(".portal-tabs button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".portal-tabs button").forEach(function (x) { x.classList.remove("an"); });
+      document.querySelectorAll(".portal-bereich").forEach(function (x) { x.classList.remove("an"); });
+      b.classList.add("an");
+      $("b-" + b.dataset.b).classList.add("an");
+    });
+  });
+
+  // ---------- Start ----------
+  sb.auth.onAuthStateChange(function (_ereignis, sitzung) {
+    if (sitzung && sitzung.user && !nutzer) {
+      nutzer = sitzung.user;
+      portalStarten();
+    } else if (!sitzung) {
+      zeige("p-login");
+    }
+  });
+
+  async function portalStarten() {
+    zeige("p-portal");
+    $("wer").textContent = nutzer.email;
+    await profilLaden();
+    antraegeLaden();
+    beteiligungenLaden();
+    stellenLaden();
+    var a = await sb.from("admins").select("id").eq("id", nutzer.id).maybeSingle();
+    if (a.data) $("admin-link").style.display = "";
+  }
+
+  // ---------- Profil ----------
+  async function profilLaden() {
+    var r = await sb.from("profile").select("*").eq("id", nutzer.id).maybeSingle();
+    if (r.error) { fehler("Profil konnte nicht geladen werden: " + r.error.message); return; }
+    var p = r.data || {};
+    $("pf-vorname").value = p.vorname || "";
+    $("pf-nachname").value = p.nachname || "";
+    $("pf-ort").value = p.ort || "";
+    $("pf-telefon").value = p.telefon || "";
+    $("pf-beruf").value = p.berufsgruppe || "";
+    $("pf-fach").value = p.fachrichtung || "";
+    $("pf-mail").checked = p.benachrichtigungen !== false;
+  }
+
+  $("profil-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    $("profil-status").textContent = "Speichert …";
+    var r = await sb.from("profile").update({
+      vorname: $("pf-vorname").value.trim(),
+      nachname: $("pf-nachname").value.trim(),
+      ort: $("pf-ort").value.trim(),
+      telefon: $("pf-telefon").value.trim(),
+      berufsgruppe: $("pf-beruf").value,
+      fachrichtung: $("pf-fach").value.trim(),
+      benachrichtigungen: $("pf-mail").checked
+    }).eq("id", nutzer.id);
+    $("profil-status").textContent = r.error ? "Fehler: " + r.error.message : "✓ Gespeichert";
+  });
+
+  // ---------- Anträge ----------
+  $("an-jahr").value = new Date().getFullYear() - 1;
+
+  $("antrag-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    $("antrag-status").textContent = "Wird gesendet …";
+    var r = await sb.from("antraege").insert({
+      mitglied: nutzer.id,
+      art: $("an-art").value,
+      jahr: parseInt($("an-jahr").value, 10),
+      betrag: $("an-betrag").value.trim(),
+      anschrift: $("an-anschrift").value.trim(),
+      anmerkung: $("an-anmerkung").value.trim()
+    });
+    if (r.error) { $("antrag-status").textContent = "Fehler: " + r.error.message; return; }
+    $("antrag-status").textContent = "✓ Antrag eingereicht – der Vorstand prüft ihn.";
+    $("antrag-form").reset();
+    $("an-jahr").value = new Date().getFullYear() - 1;
+    antraegeLaden();
+  });
+
+  async function antraegeLaden() {
+    var r = await sb.from("antraege").select("*").order("erstellt", { ascending: false });
+    var ziel = $("antraege-liste");
+    if (r.error) { ziel.textContent = "Fehler beim Laden."; return; }
+    if (!r.data.length) { ziel.textContent = "Noch keine Anträge gestellt."; return; }
+    ziel.classList.remove("laden");
+    ziel.innerHTML = r.data.map(function (a) {
+      return '<div class="eintrag"><div class="kopf"><strong>' + esc(a.art) + " " + a.jahr + "</strong>" +
+        '<span class="status-zeile st-' + a.status + '">' + a.status + "</span></div>" +
+        '<div style="font-size:0.88rem;color:var(--ink-soft)">eingereicht am ' + new Date(a.erstellt).toLocaleDateString("de-DE") + "</div>" +
+        (a.kommentar ? '<div class="kommentar"><strong>Kommentar des Vorstands:</strong> ' + esc(a.kommentar) + "</div>" : "") +
+        "</div>";
+    }).join("");
+  }
+
+  // ---------- Beteiligungen ----------
+  $("beteiligung-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    $("beteiligung-status").textContent = "Wird gesendet …";
+    var r = await sb.from("beteiligungen").insert({
+      mitglied: nutzer.id,
+      projekt: $("bt-projekt").value,
+      nachricht: $("bt-nachricht").value.trim()
+    });
+    if (r.error) { $("beteiligung-status").textContent = "Fehler: " + r.error.message; return; }
+    $("beteiligung-status").textContent = "✓ Danke! Der Vorstand meldet sich bei Ihnen.";
+    $("beteiligung-form").reset();
+    beteiligungenLaden();
+  });
+
+  async function beteiligungenLaden() {
+    var r = await sb.from("beteiligungen").select("*").order("erstellt", { ascending: false });
+    var ziel = $("beteiligungen-liste");
+    if (r.error) { ziel.textContent = "Fehler beim Laden."; return; }
+    if (!r.data.length) { ziel.textContent = "Noch keine Meldungen."; return; }
+    ziel.classList.remove("laden");
+    ziel.innerHTML = r.data.map(function (b) {
+      return '<div class="eintrag"><strong>' + esc(b.projekt) + "</strong>" +
+        '<div style="font-size:0.88rem;color:var(--ink-soft)">gemeldet am ' + new Date(b.erstellt).toLocaleDateString("de-DE") + "</div></div>";
+    }).join("");
+  }
+
+  // ---------- Stellenbörse ----------
+  $("stellen-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    $("stellen-status").textContent = "Wird veröffentlicht …";
+    var r = await sb.from("stellen").insert({
+      mitglied: nutzer.id,
+      typ: $("st-typ").value,
+      titel: $("st-titel").value.trim(),
+      ort: $("st-ort").value.trim(),
+      beschreibung: $("st-text").value.trim(),
+      kontakt: $("st-kontakt").value.trim()
+    });
+    if (r.error) { $("stellen-status").textContent = "Fehler: " + r.error.message; return; }
+    $("stellen-status").textContent = "✓ Veröffentlicht.";
+    $("stellen-form").reset();
+    stellenLaden();
+  });
+
+  async function stellenLaden() {
+    var r = await sb.from("stellen").select("*").order("erstellt", { ascending: false }).limit(50);
+    var ziel = $("stellen-liste");
+    if (r.error) { ziel.textContent = "Fehler beim Laden."; return; }
+    if (!r.data.length) { ziel.textContent = "Noch keine Einträge – geben Sie den ersten auf!"; return; }
+    ziel.classList.remove("laden");
+    ziel.innerHTML = r.data.map(function (s) {
+      var eigen = s.mitglied === nutzer.id;
+      return '<div class="eintrag"><div class="kopf"><strong>' + esc(s.titel) + "</strong>" +
+        '<span class="tag">' + esc(s.typ) + "</span></div>" +
+        '<div style="font-size:0.88rem;color:var(--ink-soft)">' + esc(s.ort || "") + " · " + new Date(s.erstellt).toLocaleDateString("de-DE") + "</div>" +
+        "<p style=\"font-size:0.94rem;margin-top:0.4rem\">" + esc(s.beschreibung) + "</p>" +
+        '<div style="font-size:0.9rem;margin-top:0.4rem">Kontakt: <strong>' + esc(s.kontakt) + "</strong>" +
+        (eigen ? ' · <a href="#" data-weg="' + s.id + '">Eintrag löschen</a>' : "") + "</div></div>";
+    }).join("");
+    ziel.querySelectorAll("[data-weg]").forEach(function (a) {
+      a.addEventListener("click", async function (e) {
+        e.preventDefault();
+        if (!confirm("Diesen Eintrag löschen?")) return;
+        await sb.from("stellen").delete().eq("id", a.dataset.weg);
+        stellenLaden();
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
