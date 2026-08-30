@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PalMed – Website bearbeiten</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png?v=3">
+<style>
+  :root {
+    --gruen: #008233; --gruen-dunkel: #006b2c; --rot: #cf1e12;
+    --ink: #1c1c1c; --grau: #4a5560; --linie: #dfe5ea; --bg: #f2efe8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--ink); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  .leiste {
+    background: #ffffff; border-bottom: 3px solid; padding: 10px 16px;
+    border-image: linear-gradient(90deg, #1a1a1a 0 33%, var(--gruen) 33% 66%, var(--rot) 66% 100%) 1;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: none;
+  }
+  .leiste .titel { font-weight: 700; font-size: 1.05rem; margin-right: 8px; }
+  .leiste .titel span { color: var(--gruen); }
+  select {
+    padding: 9px 12px; border: 1px solid var(--linie); border-radius: 8px;
+    font-size: 0.95rem; background: #fff; min-width: 180px; cursor: pointer;
+  }
+  button {
+    padding: 9px 18px; border-radius: 999px; border: 2px solid transparent;
+    font-size: 0.93rem; font-weight: 600; cursor: pointer; background: #eee;
+  }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .b-gruen { background: var(--gruen-dunkel); color: #fff; }
+  .b-gruen:hover:not(:disabled) { background: var(--gruen); }
+  .b-rot { background: var(--rot); color: #fff; }
+  .b-kontur { background: transparent; border-color: var(--gruen-dunkel); color: var(--gruen-dunkel); }
+  .b-kontur:hover:not(:disabled) { background: var(--gruen-dunkel); color: #fff; }
+  .status { margin-left: auto; font-size: 0.9rem; color: var(--grau); }
+  .status.ok { color: var(--gruen-dunkel); font-weight: 700; }
+  .status.warn { color: var(--rot); font-weight: 700; }
+
+  .buehne { flex: 1; display: flex; min-height: 0; }
+  iframe { flex: 1; border: 0; background: #fff; }
+
+  .start {
+    flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .start-box {
+    background: #fff; border-radius: 18px; padding: 44px 48px; max-width: 620px;
+    box-shadow: 0 8px 30px rgba(20,30,25,0.12); text-align: center;
+  }
+  .start-box img { height: 110px; margin: 0 auto 20px; }
+  .start-box h1 { font-size: 1.5rem; margin-bottom: 10px; }
+  .start-box p { color: var(--grau); margin-bottom: 10px; line-height: 1.55; }
+  .start-box .knoepfe { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+  .hinweis { font-size: 0.82rem; color: var(--grau); margin-top: 22px; border-top: 1px solid var(--linie); padding-top: 14px; }
+
+  .hilfe {
+    background: #e6f4ec; border-bottom: 1px solid var(--linie); padding: 7px 16px;
+    font-size: 0.85rem; color: #1e4230; flex: none; display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="leiste">
+  <span class="titel">Pal<span>Med</span> · Website bearbeiten</span>
+  <select id="seitenwahl" disabled>
+    <option value="index.html">Startseite</option>
+    <option value="ueber-uns.html">Über uns</option>
+    <option value="vorstand.html">Vorstand</option>
+    <option value="aktuelles.html">Aktuelles</option>
+    <option value="spenden.html">Spenden</option>
+    <option value="mitglied-werden.html">Mitglied werden</option>
+    <option value="kontakt.html">Kontakt</option>
+    <option value="impressum.html">Impressum</option>
+    <option value="datenschutz.html">Datenschutz</option>
+  </select>
+  <button id="speichern" class="b-gruen" disabled>Speichern</button>
+  <button id="verwerfen" class="b-kontur" disabled>Verwerfen</button>
+  <button id="neu" class="b-kontur" style="display:none">＋ Neue Meldung</button>
+  <span class="status" id="status">Noch keine Seite geladen</span>
+</div>
+
+<div class="hilfe" id="hilfe">
+  ✏️ In einen Text klicken und tippen. Bild ändern: <strong>Doppelklick</strong> aufs Bild. Andere Seite: einfach die <strong>Navigation der Seite</strong> anklicken oder das Menü oben links nutzen. Danach oben auf <strong>Speichern</strong>.
+</div>
+
+<div class="buehne" id="buehne">
+  <div class="start" id="start">
+    <div class="start-box">
+      <img src="logo.png?v=3" alt="PalMed Deutschland">
+      <h1>Website bearbeiten</h1>
+      <p>Hier können Sie alle Texte und Bilder der Website direkt ändern – die Seite sieht dabei genauso aus wie für Besucher.</p>
+      <div class="knoepfe">
+        <button class="b-gruen" id="ordner-btn" style="font-size:1rem;padding:12px 26px">Website-Ordner auswählen &amp; loslegen</button>
+        <button class="b-kontur" id="einfach-btn">Ohne Ordnerzugriff arbeiten</button>
+      </div>
+      <p class="hinweis" id="hinweis-lokal">
+        <strong>Empfohlen:</strong> „Website-Ordner auswählen" (Chrome oder Edge) – Änderungen werden beim Speichern direkt in die Website-Dateien geschrieben.<br>
+        „Ohne Ordnerzugriff": Beim Speichern wird die geänderte Datei heruntergeladen und muss die alte Datei ersetzen.
+      </p>
+      <p class="hinweis" id="hinweis-online" style="display:none">
+        <strong>Sie sind auf der Online-Vorschau.</strong> Zum Ausprobieren wählen Sie „Ohne Ordnerzugriff arbeiten“ – Sie können dann alles bearbeiten wie im echten Betrieb.
+        Die veröffentlichte Website verändert sich dabei <strong>nicht</strong>; beim Speichern wird die geänderte Seite als Datei heruntergeladen.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var dirHandle = null;       // Ordner-Zugriff (Modus A)
+  var einfachModus = false;   // Fallback ohne Ordner (Modus B)
+  var aktuelleSeite = null;
+  var scriptSpeicher = [];    // Original-Skripte der Seite
+  var frame = null;
+  var geaendert = false;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var wahl = $("seitenwahl"), btnSpeichern = $("speichern"), btnVerwerfen = $("verwerfen"),
+      btnNeu = $("neu"), status = $("status"), start = $("start"), buehne = $("buehne"), hilfe = $("hilfe");
+  var seitenListe = Array.prototype.map.call(wahl.options, function (o) { return o.value; });
+
+  function meldung(text, art) {
+    status.textContent = text;
+    status.className = "status" + (art ? " " + art : "");
+  }
+
+  // Online-Vorschau erkennen (dann kann nur heruntergeladen werden)
+  var istOnline = ["localhost", "127.0.0.1", ""].indexOf(location.hostname) === -1;
+  if (istOnline) {
+    $("hinweis-lokal").style.display = "none";
+    $("hinweis-online").style.display = "";
+    $("ordner-btn").style.display = "none";
+    $("einfach-btn").className = "b-gruen";
+    $("einfach-btn").style.cssText = "font-size:1rem;padding:12px 26px";
+    $("einfach-btn").textContent = "Bearbeiten ausprobieren";
+  }
+
+  // ---------- Start ----------
+  $("ordner-btn").addEventListener("click", async function () {
+    if (!window.showDirectoryPicker) {
+      alert("Dieser Browser unterstützt den direkten Ordnerzugriff nicht.\nBitte Chrome oder Edge verwenden – oder „Ohne Ordnerzugriff arbeiten“ wählen.");
+      return;
+    }
+    try {
+      dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+      await dirHandle.getFileHandle("index.html"); // Ordner-Check
+    } catch (e) {
+      if (e && e.name === "AbortError") return;
+      alert("Das scheint nicht der Website-Ordner zu sein (index.html nicht gefunden).\nBitte den Ordner „palmed-website“ auswählen.");
+      dirHandle = null;
+      return;
+    }
+    aktivieren();
+  });
+
+  $("einfach-btn").addEventListener("click", function () {
+    einfachModus = true;
+    aktivieren();
+  });
+
+  function aktivieren() {
+    wahl.disabled = false;
+    hilfe.style.display = "block";
+    ladeSeite(wahl.value);
+  }
+
+  // ---------- Seite laden ----------
+  async function ladeSeite(datei) {
+    var roh;
+    try {
+      if (dirHandle) {
+        var fh = await dirHandle.getFileHandle(datei);
+        roh = await (await fh.getFile()).text();
+      } else {
+        var antwort = await fetch(datei, { cache: "no-store" });
+        if (!antwort.ok) throw new Error(antwort.status);
+        roh = await antwort.text();
+      }
+    } catch (e) {
+      meldung("Konnte " + datei + " nicht laden", "warn");
+      return;
+    }
+
+    // Skripte herausnehmen und merken (damit die Seite im Editor ruhig ist
+    // und beim Speichern nichts verloren geht)
+    scriptSpeicher = [];
+    roh = roh.replace(/<script\b[\s\S]*?<\/script>/gi, function (m) {
+      scriptSpeicher.push(m);
+      return "<!--ADMIN-SCRIPT-" + (scriptSpeicher.length - 1) + "-->";
+    });
+
+    // Editor-Style: Animationen aus, damit alles sofort sichtbar ist
+    // (wird beim Speichern wieder entfernt)
+    roh = roh.replace("</head>",
+      '<style data-admin="1">*, *::before, *::after { animation: none !important; transition: none !important; }<\/style></head>');
+
+    aktuelleSeite = datei;
+    geaendert = false;
+
+    start.style.display = "none";
+    if (frame) frame.remove();
+    frame = document.createElement("iframe");
+    buehne.appendChild(frame);
+    frame.srcdoc = roh;
+
+    frame.addEventListener("load", function () {
+      var doc = frame.contentDocument;
+      doc.designMode = "on";
+
+      // Links: interne Seiten wechseln, alles andere stilllegen
+      doc.addEventListener("click", function (e) {
+        var a = e.target.closest && e.target.closest("a");
+        if (!a) return;
+        e.preventDefault();
+        var ziel = (a.getAttribute("href") || "").split("#")[0].split("?")[0];
+        if (ziel && seitenListe.indexOf(ziel) !== -1 && ziel !== aktuelleSeite) {
+          if (!geaendert || confirm("Ungespeicherte Änderungen gehen verloren. Trotzdem die Seite wechseln?")) {
+            wahl.value = ziel;
+            ladeSeite(ziel);
+          }
+        }
+      }, true);
+      doc.addEventListener("submit", function (e) { e.preventDefault(); }, true);
+
+      // Bild per Doppelklick tauschen
+      doc.addEventListener("dblclick", function (e) {
+        if (e.target.tagName === "IMG") bildTauschen(e.target);
+      }, true);
+
+      doc.addEventListener("input", function () {
+        geaendert = true;
+        meldung("Ungespeicherte Änderungen …");
+        btnSpeichern.disabled = false;
+      });
+
+      btnSpeichern.disabled = true;
+      btnVerwerfen.disabled = false;
+      btnNeu.style.display = (aktuelleSeite === "aktuelles.html") ? "" : "none";
+      meldung("Bereit – klicken Sie in einen Text zum Bearbeiten");
+    }, { once: true });
+  }
+
+  wahl.addEventListener("change", function () {
+    if (geaendert && !confirm("Ungespeicherte Änderungen gehen verloren. Trotzdem wechseln?")) {
+      wahl.value = aktuelleSeite;
+      return;
+    }
+    ladeSeite(wahl.value);
+  });
+
+  btnVerwerfen.addEventListener("click", function () {
+    if (!geaendert || confirm("Alle ungespeicherten Änderungen verwerfen?")) ladeSeite(aktuelleSeite);
+  });
+
+  // ---------- Neue Meldung (Aktuelles) ----------
+  function heutigesDatum() {
+    var monate = ["Januar", "Februar", "März", "April", "Mai", "Juni",
+                  "Juli", "August", "September", "Oktober", "November", "Dezember"];
+    var d = new Date();
+    return d.getDate() + ". " + monate[d.getMonth()] + " " + d.getFullYear();
+  }
+
+  btnNeu.addEventListener("click", function () {
+    if (!frame) return;
+    var doc = frame.contentDocument;
+    var liste = doc.querySelector(".news-list");
+    if (!liste) {
+      alert("Auf dieser Seite gibt es keine Nachrichtenliste.");
+      return;
+    }
+    var el = doc.createElement("div");
+    el.className = "news-item";
+    el.innerHTML = '<span class="date">' + heutigesDatum() + "</span>"
+      + "<div><h3>Titel der neuen Meldung</h3><p>Hier den Text der Meldung schreiben.</p></div>"
+      + '<span class="tag">Neu</span>';
+    liste.insertBefore(el, liste.firstChild);
+    el.scrollIntoView({ block: "center" });
+    geaendert = true;
+    btnSpeichern.disabled = false;
+    meldung("Neue Meldung eingefügt – Titel, Text und Datum anpassen, dann speichern");
+  });
+
+  // ---------- Bild tauschen ----------
+  function bildTauschen(img) {
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/png,image/jpeg,image/webp";
+    input.addEventListener("change", async function () {
+      var datei = input.files[0];
+      if (!datei) return;
+      var name = datei.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
+
+      if (dirHandle) {
+        try {
+          var imgOrdner = await dirHandle.getDirectoryHandle("img", { create: true });
+          var ziel = await imgOrdner.getFileHandle(name, { create: true });
+          var w = await ziel.createWritable();
+          await w.write(datei);
+          await w.close();
+          img.src = "img/" + name;
+          img.removeAttribute("width");
+          img.removeAttribute("height");
+          geaendert = true;
+          btnSpeichern.disabled = false;
+          meldung("Bild ersetzt – bitte speichern");
+        } catch (e) {
+          alert("Bild konnte nicht gespeichert werden: " + e.message);
+        }
+      } else {
+        alert("Bildtausch geht nur im Modus mit Ordnerzugriff.\nBitte neu starten und „Website-Ordner auswählen“ nutzen (Chrome/Edge).");
+      }
+    });
+    input.click();
+  }
+
+  // ---------- Speichern ----------
+  btnSpeichern.addEventListener("click", async function () {
+    if (!frame) return;
+    var doc = frame.contentDocument;
+    var html = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+
+    // Original-Skripte wieder einsetzen, Editor-Style entfernen
+    html = html.replace(/<!--ADMIN-SCRIPT-(\d+)-->/g, function (_, n) {
+      return scriptSpeicher[Number(n)] || "";
+    });
+    html = html.replace(/<style data-admin="1">[\s\S]*?<\/style>/g, "");
+
+    if (dirHandle) {
+      try {
+        var fh = await dirHandle.getFileHandle(aktuelleSeite, { create: true });
+        var w = await fh.createWritable();
+        await w.write(html);
+        await w.close();
+        geaendert = false;
+        btnSpeichern.disabled = true;
+        meldung("Gespeichert ✓ (" + aktuelleSeite + ")", "ok");
+      } catch (e) {
+        meldung("Fehler beim Speichern: " + e.message, "warn");
+      }
+    } else {
+      var blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = aktuelleSeite;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      geaendert = false;
+      btnSpeichern.disabled = true;
+      meldung("Heruntergeladen – bitte die alte Datei damit ersetzen", "ok");
+    }
+  });
+
+  window.addEventListener("beforeunload", function (e) {
+    if (geaendert) { e.preventDefault(); e.returnValue = ""; }
+  });
+})();
+</script>
+
+</body>
+</html>
