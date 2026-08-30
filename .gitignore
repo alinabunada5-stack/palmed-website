@@ -1,0 +1,6 @@
+# Bedienoberflaeche - gehoert NICHT auf den oeffentlichen Server
+admin.html
+
+# Pakete und lokale Dateien
+*.zip
+.claude/
