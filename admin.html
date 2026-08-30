@@ -59,6 +59,24 @@
     background: #e6f4ec; border-bottom: 1px solid var(--linie); padding: 7px 16px;
     font-size: 0.85rem; color: #1e4230; flex: none; display: none;
   }
+
+  .maske-hintergrund {
+    position: fixed; inset: 0; background: rgba(18, 24, 20, 0.55);
+    display: flex; align-items: center; justify-content: center; z-index: 60; padding: 20px;
+  }
+  .maske-karte {
+    background: #fff; border-radius: 16px; padding: 26px 30px; width: 100%; max-width: 540px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-height: 92vh; overflow: auto;
+  }
+  .maske-karte h2 { font-size: 1.25rem; margin-bottom: 6px; }
+  .maske-karte .untertitel { color: var(--grau); font-size: 0.88rem; margin-bottom: 10px; }
+  .maske-karte label { display: block; font-size: 0.85rem; font-weight: 600; margin: 14px 0 5px; }
+  .maske-karte input, .maske-karte textarea, .maske-karte select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--linie); border-radius: 8px;
+    font-size: 0.95rem; font-family: inherit;
+  }
+  .maske-karte textarea { min-height: 90px; resize: vertical; }
+  .maske-knoepfe { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 </style>
 </head>
 <body>
@@ -69,6 +87,7 @@
     <option value="index.html">Startseite</option>
     <option value="ueber-uns.html">Über uns</option>
     <option value="vorstand.html">Vorstand</option>
+    <option value="projekte.html">Projekte</option>
     <option value="aktuelles.html">Aktuelles</option>
     <option value="spenden.html">Spenden</option>
     <option value="mitglied-werden.html">Mitglied werden</option>
@@ -78,12 +97,11 @@
   </select>
   <button id="speichern" class="b-gruen" disabled>Speichern</button>
   <button id="verwerfen" class="b-kontur" disabled>Verwerfen</button>
-  <button id="neu" class="b-kontur" style="display:none">＋ Neue Meldung</button>
   <span class="status" id="status">Noch keine Seite geladen</span>
 </div>
 
 <div class="hilfe" id="hilfe">
-  ✏️ In einen Text klicken und tippen. Bild ändern: <strong>Doppelklick</strong> aufs Bild. Andere Seite: einfach die <strong>Navigation der Seite</strong> anklicken oder das Menü oben links nutzen. Danach oben auf <strong>Speichern</strong>.
+  ✏️ In einen Text klicken und tippen · Bild ändern: <strong>Doppelklick</strong> aufs Bild · Hinzufügen: die grünen <strong>＋&#8209;Knöpfe</strong> auf der Seite · Löschen/Verschieben: mit der Maus über einen Eintrag fahren · Danach oben <strong>Speichern</strong>.
 </div>
 
 <div class="buehne" id="buehne">
@@ -108,6 +126,18 @@
   </div>
 </div>
 
+<div class="maske-hintergrund" id="maske" style="display:none">
+  <form class="maske-karte" id="maske-form">
+    <h2 id="maske-titel">Hinzufügen</h2>
+    <p class="untertitel">Alles lässt sich danach direkt auf der Seite weiter bearbeiten.</p>
+    <div id="maske-felder"></div>
+    <div class="maske-knoepfe">
+      <button type="button" class="b-kontur" id="maske-abbrechen">Abbrechen</button>
+      <button type="submit" class="b-gruen">Hinzufügen</button>
+    </div>
+  </form>
+</div>
+
 <script>
 (function () {
   var dirHandle = null;       // Ordner-Zugriff (Modus A)
@@ -119,7 +149,8 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var wahl = $("seitenwahl"), btnSpeichern = $("speichern"), btnVerwerfen = $("verwerfen"),
-      btnNeu = $("neu"), status = $("status"), start = $("start"), buehne = $("buehne"), hilfe = $("hilfe");
+      status = $("status"), start = $("start"), buehne = $("buehne"), hilfe = $("hilfe"),
+      maske = $("maske"), maskeForm = $("maske-form"), maskeFelder = $("maske-felder"), maskeTitel = $("maske-titel");
   var seitenListe = Array.prototype.map.call(wahl.options, function (o) { return o.value; });
 
   function meldung(text, art) {
@@ -238,7 +269,7 @@
 
       btnSpeichern.disabled = true;
       btnVerwerfen.disabled = false;
-      btnNeu.style.display = (aktuelleSeite === "aktuelles.html") ? "" : "none";
+      adminUiEinbauen(doc);
       meldung("Bereit – klicken Sie in einen Text zum Bearbeiten");
     }, { once: true });
   }
@@ -255,72 +286,329 @@
     if (!geaendert || confirm("Alle ungespeicherten Änderungen verwerfen?")) ladeSeite(aktuelleSeite);
   });
 
-  // ---------- Neue Meldung (Aktuelles) ----------
+  // ---------- Hilfen ----------
+  function markiereGeaendert() {
+    geaendert = true;
+    btnSpeichern.disabled = false;
+    meldung("Ungespeicherte Änderungen …");
+  }
+
   function heutigesDatum() {
     var monate = ["Januar", "Februar", "März", "April", "Mai", "Juni",
                   "Juli", "August", "September", "Oktober", "November", "Dezember"];
     var d = new Date();
     return d.getDate() + ". " + monate[d.getMonth()] + " " + d.getFullYear();
   }
+  var MONK = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
-  btnNeu.addEventListener("click", function () {
-    if (!frame) return;
-    var doc = frame.contentDocument;
-    var liste = doc.querySelector(".news-list");
-    if (!liste) {
-      alert("Auf dieser Seite gibt es keine Nachrichtenliste.");
+  function esc(t) {
+    return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // Bilddatei in den img-Ordner schreiben, liefert den Pfad
+  async function bildSpeichern(datei) {
+    var name = datei.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
+    var imgOrdner = await dirHandle.getDirectoryHandle("img", { create: true });
+    var ziel = await imgOrdner.getFileHandle(name, { create: true });
+    var w = await ziel.createWritable();
+    await w.write(datei);
+    await w.close();
+    return "img/" + name;
+  }
+
+  // ---------- Bild tauschen (Doppelklick) ----------
+  function bildTauschen(img) {
+    if (!dirHandle) {
+      alert("Bildtausch geht nur im Modus mit Ordnerzugriff.\nBitte neu starten und „Website-Ordner auswählen“ nutzen (Chrome/Edge).");
       return;
     }
-    var el = doc.createElement("div");
-    el.className = "news-item";
-    el.innerHTML = '<span class="date">' + heutigesDatum() + "</span>"
-      + "<div><h3>Titel der neuen Meldung</h3><p>Hier den Text der Meldung schreiben.</p></div>"
-      + '<span class="tag">Neu</span>';
-    liste.insertBefore(el, liste.firstChild);
-    el.scrollIntoView({ block: "center" });
-    geaendert = true;
-    btnSpeichern.disabled = false;
-    meldung("Neue Meldung eingefügt – Titel, Text und Datum anpassen, dann speichern");
-  });
-
-  // ---------- Bild tauschen ----------
-  function bildTauschen(img) {
     var input = document.createElement("input");
     input.type = "file";
     input.accept = "image/png,image/jpeg,image/webp";
     input.addEventListener("change", async function () {
       var datei = input.files[0];
       if (!datei) return;
-      var name = datei.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
-
-      if (dirHandle) {
-        try {
-          var imgOrdner = await dirHandle.getDirectoryHandle("img", { create: true });
-          var ziel = await imgOrdner.getFileHandle(name, { create: true });
-          var w = await ziel.createWritable();
-          await w.write(datei);
-          await w.close();
-          img.src = "img/" + name;
-          img.removeAttribute("width");
-          img.removeAttribute("height");
-          geaendert = true;
-          btnSpeichern.disabled = false;
-          meldung("Bild ersetzt – bitte speichern");
-        } catch (e) {
-          alert("Bild konnte nicht gespeichert werden: " + e.message);
-        }
-      } else {
-        alert("Bildtausch geht nur im Modus mit Ordnerzugriff.\nBitte neu starten und „Website-Ordner auswählen“ nutzen (Chrome/Edge).");
+      try {
+        img.src = await bildSpeichern(datei);
+        img.removeAttribute("width");
+        img.removeAttribute("height");
+        markiereGeaendert();
+        meldung("Bild ersetzt – bitte speichern");
+      } catch (e) {
+        alert("Bild konnte nicht gespeichert werden: " + e.message);
       }
     });
     input.click();
+  }
+
+  // ---------- Plus-Knöpfe direkt auf der Seite ----------
+  var PLUS_KONFIG = {
+    "aktuelles.html": [
+      { ziel: ".card-grid-3", typ: "karte", text: "＋ Meldung mit Bild hinzufügen" },
+      { ziel: ".news-list", index: 0, typ: "meldung", text: "＋ Meldung hinzufügen" },
+      { ziel: ".news-list", index: 1, typ: "veranstaltung", text: "＋ Veranstaltung hinzufügen" }
+    ],
+    "projekte.html": [
+      { ziel: "#projekte-grid", typ: "projekt", text: "＋ Projekt hinzufügen" }
+    ],
+    "vorstand.html": [
+      { ziel: ".team-grid", typ: "person", text: "＋ Vorstandsmitglied hinzufügen" }
+    ],
+    "index.html": [
+      { ziel: ".faq", typ: "frage", text: "＋ Frage hinzufügen" }
+    ]
+  };
+
+  function adminUiEinbauen(doc) {
+    if (!doc.querySelector("style.admin-ui")) {
+      var st = doc.createElement("style");
+      st.className = "admin-ui";
+      st.textContent =
+        ".admin-plus{display:block;width:100%;margin:16px 0;padding:11px 20px;border:2px dashed #008233;" +
+        "border-radius:999px;background:#e6f4ec;color:#006b2c;font:600 15px 'Segoe UI',sans-serif;cursor:pointer}" +
+        ".admin-plus:hover{background:#008233;color:#fff}" +
+        "#admin-steuer{position:absolute;z-index:9999;display:flex;gap:2px;background:#1c1c1c;border-radius:8px;" +
+        "padding:4px;box-shadow:0 4px 16px rgba(0,0,0,.35)}" +
+        "#admin-steuer button{border:0;background:transparent;color:#fff;font:600 13px 'Segoe UI',sans-serif;" +
+        "padding:4px 9px;cursor:pointer;border-radius:5px}" +
+        "#admin-steuer button:hover{background:#008233}" +
+        "#admin-steuer button.weg:hover{background:#cf1e12}";
+      doc.head.appendChild(st);
+    }
+
+    (PLUS_KONFIG[aktuelleSeite] || []).forEach(function (k) {
+      var ziel = doc.querySelectorAll(k.ziel)[k.index || 0];
+      if (!ziel || ziel.parentNode.querySelector('.admin-plus[data-typ="' + k.typ + '"]')) return;
+      var b = doc.createElement("button");
+      b.type = "button";
+      b.className = "admin-ui admin-plus";
+      b.contentEditable = "false";
+      b.dataset.typ = k.typ;
+      b.textContent = k.text;
+      b.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        maskeZeigen(k.typ, ziel);
+      });
+      ziel.parentNode.insertBefore(b, ziel.nextSibling);
+    });
+
+    steuerungEinbauen(doc);
+  }
+
+  // ---------- Schwebende Steuerung: löschen & verschieben ----------
+  function steuerungEinbauen(doc) {
+    if (doc.getElementById("admin-steuer")) return;
+    var leiste = doc.createElement("div");
+    leiste.id = "admin-steuer";
+    leiste.className = "admin-ui";
+    leiste.contentEditable = "false";
+    leiste.style.display = "none";
+    leiste.innerHTML =
+      '<button type="button" data-tu="hoch" title="Nach oben verschieben">↑</button>' +
+      '<button type="button" data-tu="runter" title="Nach unten verschieben">↓</button>' +
+      '<button type="button" data-tu="weg" class="weg" title="Eintrag löschen">✕</button>';
+    doc.body.appendChild(leiste);
+
+    var ziel = null;
+    var AUSWAHL = ".news-item, .news-card, .person, .timeline-item, .faq details, .tier";
+
+    function zeigen(el) {
+      var r = el.getBoundingClientRect();
+      var w = doc.defaultView;
+      leiste.style.display = "flex";
+      leiste.style.top = Math.max(2, r.top + w.scrollY - 16) + "px";
+      leiste.style.left = Math.max(2, r.right + w.scrollX - 110) + "px";
+    }
+
+    doc.addEventListener("mouseover", function (e) {
+      if (leiste.contains(e.target)) return;
+      var el = e.target.closest && e.target.closest(AUSWAHL);
+      if (el) {
+        ziel = el;
+        zeigen(el);
+      } else {
+        leiste.style.display = "none";
+      }
+    });
+
+    leiste.addEventListener("click", function (e) {
+      var tu = e.target.dataset && e.target.dataset.tu;
+      if (!tu || !ziel) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (tu === "weg") {
+        if (confirm("Diesen Eintrag wirklich löschen?")) {
+          ziel.remove();
+          leiste.style.display = "none";
+          ziel = null;
+          markiereGeaendert();
+        }
+      } else if (tu === "hoch") {
+        var vor = ziel.previousElementSibling;
+        if (vor && !vor.classList.contains("admin-ui")) {
+          ziel.parentNode.insertBefore(ziel, vor);
+          zeigen(ziel);
+          markiereGeaendert();
+        }
+      } else if (tu === "runter") {
+        var nach = ziel.nextElementSibling;
+        if (nach && !nach.classList.contains("admin-ui")) {
+          ziel.parentNode.insertBefore(nach, ziel);
+          zeigen(ziel);
+          markiereGeaendert();
+        }
+      }
+    });
+  }
+
+  // ---------- Eingabemaske ----------
+  var maskeKontext = null;
+
+  function feld(name, beschriftung, wert, pflicht) {
+    return '<label for="mf-' + name + '">' + beschriftung + (pflicht ? " *" : "") + "</label>" +
+      '<input type="text" id="mf-' + name + '" name="' + name + '" value="' + esc(wert || "") + '"' + (pflicht ? " required" : "") + ">";
+  }
+  function bereich(name, beschriftung, pflicht) {
+    return '<label for="mf-' + name + '">' + beschriftung + (pflicht ? " *" : "") + "</label>" +
+      '<textarea id="mf-' + name + '" name="' + name + '"' + (pflicht ? " required" : "") + "></textarea>";
+  }
+  function auswahl(name, beschriftung, optionen) {
+    return '<label for="mf-' + name + '">' + beschriftung + "</label>" +
+      '<select id="mf-' + name + '" name="' + name + '">' +
+      optionen.map(function (o) { return "<option>" + o + "</option>"; }).join("") + "</select>";
+  }
+  function fotoFeld() {
+    if (dirHandle) {
+      return '<label for="mf-foto">Foto</label><input type="file" id="mf-foto" name="foto" accept="image/png,image/jpeg,image/webp">';
+    }
+    return '<p style="font-size:.85rem;color:#4a5560;margin-top:12px">Ohne Ordnerzugriff wird zunächst ein Platzhalterbild eingesetzt – das Foto lässt sich später per Doppelklick tauschen.</p>';
+  }
+
+  var MASKEN = {
+    meldung: { titel: "Neue Meldung", html: function () {
+      return feld("titel", "Titel", "", true) + feld("datum", "Datum", heutigesDatum()) +
+             feld("kategorie", "Kategorie (z. B. Einsatz, Kongress)", "Neu") + bereich("text", "Text", true);
+    }},
+    veranstaltung: { titel: "Neue Veranstaltung", html: function () {
+      return feld("titel", "Titel", "", true) + feld("datum", "Datum", heutigesDatum()) +
+             auswahl("kategorie", "Art", ["Konferenz", "Workshop", "Webinar", "Treffen"]) + bereich("text", "Beschreibung");
+    }},
+    karte: { titel: "Neue Meldung mit Bild", html: function () {
+      var d = new Date();
+      return feld("titel", "Titel", "", true) + feld("tag", "Tag (Zahl)", String(d.getDate())) +
+             feld("monat", "Monat (kurz)", MONK[d.getMonth()]) + bereich("text", "Text", true) + fotoFeld();
+    }},
+    projekt: { titel: "Neues Projekt", html: function () {
+      return feld("titel", "Titel", "", true) + feld("meta", "Ort · Zeitraum", "") +
+             auswahl("status", "Status", ["Laufend", "Abgeschlossen"]) + bereich("text", "Beschreibung", true) + fotoFeld();
+    }},
+    person: { titel: "Neues Vorstandsmitglied", html: function () {
+      return feld("name", "Name", "", true) + feld("rolle", "Funktion (z. B. Beisitzer)", "", true) +
+             feld("fach", "Fachrichtung", "") + fotoFeld();
+    }},
+    frage: { titel: "Neue Frage (FAQ)", html: function () {
+      return feld("titel", "Frage", "", true) + bereich("text", "Antwort", true);
+    }}
+  };
+
+  function maskeZeigen(typ, ziel) {
+    maskeKontext = { typ: typ, ziel: ziel };
+    maskeTitel.textContent = MASKEN[typ].titel;
+    maskeFelder.innerHTML = MASKEN[typ].html();
+    maske.style.display = "flex";
+    var erstes = maskeFelder.querySelector("input, textarea");
+    if (erstes) erstes.focus();
+  }
+
+  $("maske-abbrechen").addEventListener("click", function () {
+    maske.style.display = "none";
+    maskeKontext = null;
+  });
+  maske.addEventListener("click", function (e) {
+    if (e.target === maske) $("maske-abbrechen").click();
+  });
+
+  maskeForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    if (!maskeKontext || !frame) return;
+    var doc = frame.contentDocument;
+    var w = {};
+    maskeFelder.querySelectorAll("input[type=text], textarea, select").forEach(function (f) {
+      w[f.name] = f.value.trim();
+    });
+
+    var fotoPfad = "img/platzhalter.jpg";
+    var fotoInput = maskeFelder.querySelector("input[type=file]");
+    if (fotoInput && fotoInput.files[0]) {
+      try {
+        fotoPfad = await bildSpeichern(fotoInput.files[0]);
+      } catch (err) {
+        alert("Foto konnte nicht gespeichert werden: " + err.message);
+        return;
+      }
+    }
+
+    var el = bauElement(doc, maskeKontext.typ, w, fotoPfad);
+    var ziel = maskeKontext.ziel;
+    ziel.insertBefore(el, ziel.firstElementChild);
+    maske.style.display = "none";
+    maskeKontext = null;
+    el.scrollIntoView({ block: "center" });
+    markiereGeaendert();
+    meldung("Eingefügt – auf der Seite weiter anpassen, dann speichern");
+  });
+
+  function bauElement(doc, typ, w, fotoPfad) {
+    var el;
+    if (typ === "meldung" || typ === "veranstaltung") {
+      el = doc.createElement("div");
+      el.className = "news-item";
+      el.innerHTML = '<span class="date">' + esc(w.datum) + "</span><div><h3>" + esc(w.titel) +
+        "</h3><p>" + esc(w.text || "") + '</p></div><span class="tag">' + esc(w.kategorie || "Neu") + "</span>";
+    } else if (typ === "karte") {
+      el = doc.createElement("article");
+      el.className = "card news-card";
+      el.innerHTML = '<i class="corner tl"></i><i class="corner tr"></i>' +
+        '<div class="media"><img src="' + fotoPfad + '" alt="' + esc(w.titel) + '" loading="lazy">' +
+        '<span class="hatch"></span><span class="datum"><span><b>' + esc(w.tag) + "</b><small>" + esc(w.monat) + "</small></span></span></div>" +
+        '<div class="orna"><span></span><i></i><span></span></div>' +
+        '<div class="body"><h3>' + esc(w.titel) + "</h3><p>" + esc(w.text) + "</p>" +
+        '<a class="more" href="aktuelles.html">Weiterlesen</a></div>';
+    } else if (typ === "projekt") {
+      el = doc.createElement("article");
+      el.className = "card news-card projekt-card";
+      var fertig = w.status === "Abgeschlossen";
+      el.innerHTML = '<i class="corner tl"></i><i class="corner tr"></i>' +
+        '<div class="media"><img src="' + fotoPfad + '" alt="' + esc(w.titel) + '" loading="lazy">' +
+        '<span class="hatch"></span><span class="status-pill' + (fertig ? " fertig" : "") + '">' + esc(w.status) + "</span></div>" +
+        '<div class="orna"><span></span><i></i><span></span></div>' +
+        '<div class="body"><span class="meta">' + esc(w.meta || "") + "</span><h3>" + esc(w.titel) + "</h3><p>" + esc(w.text) + "</p>" +
+        '<a class="more" href="spenden.html">Projekt unterstützen</a></div>';
+    } else if (typ === "person") {
+      el = doc.createElement("div");
+      el.className = "person";
+      var bild = fotoPfad !== "img/platzhalter.jpg"
+        ? '<img src="' + fotoPfad + '" alt="' + esc(w.name) + '" class="photo" loading="lazy">'
+        : '<div class="avatar avatar-pending" aria-hidden="true"><img src="logo.png?v=3" alt=""></div>';
+      el.innerHTML = bild + '<div class="role">' + esc(w.rolle) + "</div><h3>" + esc(w.name) +
+        "</h3><p>" + esc(w.fach || "") + "</p>";
+    } else if (typ === "frage") {
+      el = doc.createElement("details");
+      el.innerHTML = "<summary>" + esc(w.titel) + "</summary><p>" + esc(w.text) + "</p>";
+    }
+    return el;
   }
 
   // ---------- Speichern ----------
   btnSpeichern.addEventListener("click", async function () {
     if (!frame) return;
     var doc = frame.contentDocument;
+
+    // Bedienelemente des Editors entfernen, serialisieren, danach wieder einbauen
+    doc.querySelectorAll(".admin-ui").forEach(function (e) { e.remove(); });
     var html = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+    adminUiEinbauen(doc);
 
     // Original-Skripte wieder einsetzen, Editor-Style entfernen
     html = html.replace(/<!--ADMIN-SCRIPT-(\d+)-->/g, function (_, n) {

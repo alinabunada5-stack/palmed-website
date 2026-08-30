@@ -730,6 +730,31 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--green-mid);
 .news-card .more::after { content: "\2192"; transition: transform 0.3s; }
 .news-card:hover .more::after { transform: translateX(5px); }
 
+/* ---------- Projekte ---------- */
+
+.status-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--green-mid);
+  color: #ffffff;
+  box-shadow: var(--shadow-md);
+}
+.status-pill.fertig { background: #5c6660; }
+
+.projekt-card .meta {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
 /* ---------- Animationen ---------- */
 
 @keyframes fade-up {
