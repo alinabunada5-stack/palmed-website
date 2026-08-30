@@ -87,7 +87,7 @@
     <option value="index.html">Startseite</option>
     <option value="ueber-uns.html">Über uns</option>
     <option value="vorstand.html">Vorstand</option>
-    <option value="projekte.html">Projekte</option>
+    <option value="mitglieder.html">Mitglieder: Projekte</option>
     <option value="aktuelles.html">Aktuelles</option>
     <option value="spenden.html">Spenden</option>
     <option value="mitglied-werden.html">Mitglied werden</option>
@@ -348,7 +348,7 @@
       { ziel: ".news-list", index: 0, typ: "meldung", text: "＋ Meldung hinzufügen" },
       { ziel: ".news-list", index: 1, typ: "veranstaltung", text: "＋ Veranstaltung hinzufügen" }
     ],
-    "projekte.html": [
+    "mitglieder.html": [
       { ziel: "#projekte-grid", typ: "projekt", text: "＋ Projekt hinzufügen" }
     ],
     "vorstand.html": [
@@ -372,7 +372,10 @@
         "#admin-steuer button{border:0;background:transparent;color:#fff;font:600 13px 'Segoe UI',sans-serif;" +
         "padding:4px 9px;cursor:pointer;border-radius:5px}" +
         "#admin-steuer button:hover{background:#008233}" +
-        "#admin-steuer button.weg:hover{background:#cf1e12}";
+        "#admin-steuer button.weg:hover{background:#cf1e12}" +
+        // Mitgliederseite im Editor sichtbar machen (Login-Logik ist dort abgeschaltet)
+        "#p-portal{display:block!important}#p-login,#p-setup,#p-fehler{display:none!important}" +
+        ".portal-bereich{display:block!important;margin-bottom:3rem}.hinweis-box{display:none!important}";
       doc.head.appendChild(st);
     }
 
